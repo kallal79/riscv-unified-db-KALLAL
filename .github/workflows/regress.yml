@@ -448,7 +448,17 @@ jobs:
       - name: Generate instruction appendix asciidoc
         run: ./do gen:instruction_appendix_adoc
       - name: Check instruction appendix result
-        run: ./do test:instruction_appendix
+        run: |
+          if ! ./do test:instruction_appendix; then
+            echo "::error::Instruction appendix check failed. Uploading generated file."
+            exit 1
+          fi
+      - name: Upload generated appendix on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: all_instructions.adoc
+          path: gen/instructions_appendix/all_instructions.adoc
 
   regress-cfg-manual:
     runs-on: ubuntu-latest
